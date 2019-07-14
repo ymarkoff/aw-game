@@ -54,12 +54,23 @@
 
         this.load.image('ghost', 'assets/ghost_04.png');
 
-        this.load.spritesheet('dude',
-            'assets/dude.png',
-            { frameWidth: 32, frameHeight: 48 }
-        );
+        // this.load.multiatlas('player_character_atlas', 'assets/spritesheets/player_character.json', 'assets/spritesheets');
+
+        // this.load.spritesheet('dude',
+        //     'assets/dude.png',
+        //     { frameWidth: 23, frameHeight: 60}
+        // );
+
+        this.load.multiatlas('player_character_atlas', 'assets/spritesheets/player_character.json', 'assets/spritesheets');
+
+        // this.load.spritesheet('player_character',
+        //     'assets/spritesheets/player_character.png',
+        //     { frameWidth: 25, frameHeight: 62 },
+        // );
+
 
         this.load.image("terrain", "assets/tilesets/Tileset.png");
+        this.load.image("floor", "assets/tilesets/floor.png");
 
         this.load.tilemapTiledJSON("mappy", "./assets/maps/new_york.json");
     }
@@ -71,6 +82,7 @@
         let mappy = this.add.tilemap("mappy");
 
         let terrain = mappy.addTilesetImage("Tileset", "terrain");
+        // terrain = mappy.addTilesetImage("floor", "floor")
 
 
         //Layers
@@ -83,28 +95,40 @@
         ghost.body.setGravityY(50);
 
 
-        this.player = this.physics.add.sprite(100, 250, 'dude');
+        this.player = this.physics.add.sprite(100, 250, 'player_character_atlas', 'idle-1.png');
 
         this.player.setBounce(0.2);
         this.player.setCollideWorldBounds(true);
         this.player.body.setGravityY(50);
 
+        let frameNamesRight = this.anims.generateFrameNames('player_character_atlas', {
+            start: 1, end: 12, zeroPad: 1,
+            prefix: 'run-', suffix: '.png'
+        });
         this.anims.create({
             key: 'left',
-            frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
+            // frames: this.anims.generateFrameNumbers('player_character', { start: 6, end: 11 }),
+            frames: frameNamesRight,
             frameRate: 10,
             repeat: -1
         });
-
+        var frameNames = this.anims.generateFrameNames('player_character_atlas', {
+            start: 1, end: 6, zeroPad: 1,
+            prefix: 'idle-', suffix: '.png'
+        });
         this.anims.create({
             key: 'turn',
-            frames: [ { key: 'dude', frame: 4 } ],
+            // frames: [ { key: 'player_character', frame: 4 } ],
+            // frames: this.anims.generateFrameNumbers('player_character_atlas', { start: 0, end: 5 }),
+            frames: frameNames,
             frameRate: 20
         });
 
+
         this.anims.create({
             key: 'right',
-            frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
+            // frames: this.anims.generateFrameNumbers('player_character', { start: 6, end: 11 }),
+            frames: frameNamesRight,
             frameRate: 10,
             repeat: -1
         });
@@ -151,12 +175,15 @@
     {
         if (this.cursors.left.isDown)
         {
-            this.player.setVelocityX(-160);
+            this.player.flipX = true;
 
+            this.player.setVelocityX(-160);
             this.player.anims.play('left', true);
         }
         else if (this.cursors.right.isDown)
         {
+            this.player.flipX = false;
+
             this.player.setVelocityX(160);
 
             this.player.anims.play('right', true);
@@ -181,7 +208,8 @@
         score += 10;
         scoreText.setText('Score: ' + score);
 
-        if (this.stars.countActive(true) === 0)
+        //Bug at === 0
+        if (this.stars.countActive(true) === 1)
         {
             this.stars.children.iterate(function (child) {
                 child.enableBody(true, child.x, 0, true, true);
@@ -194,7 +222,7 @@
 
             bomb.setBounce(1);
             bomb.setCollideWorldBounds(true);
-            bomb.setVelocity(Phaser.Math.Between(-200, 200, 20), 20);
+            bomb.setVelocity(Phaser.Math.Between(-400, 400, 20), 20);
         }
         else {console.log(this.stars.countActive(true))}
     }
